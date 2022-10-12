@@ -23,7 +23,6 @@ class Tagger():
         info_dict["proj"] = projectname
         info_dict["user"] = log.getUser()
         info_dict["tag"] = log.getTags()
-
         return info_dict
     
     def extract_project(self, dict):
@@ -45,7 +44,7 @@ class Tagger():
             self.path_list[i] = path
 
     def tagging(self):
-        if self.overwrite:
+        if self.overwrite ==1 :
             proj = self.extract_project(self.info_dict)
             for i, path in enumerate(self.path_list):
                 log = Labber.LogFile(path)
@@ -88,7 +87,7 @@ class App(tk.Tk):
         #Configure
         self.title("Auto Tag")
         self.geometry('400x600+1000+80')
-        self.resizable(0,0)
+        self.resizable(1,0)
         self.pw1.paneconfig(self.file, minsize = 200, height = 320)
         self.pw1.paneconfig(self.interface, minsize = 150)
 
@@ -108,10 +107,11 @@ class App(tk.Tk):
         path = self.file.get_selected()
         info = self.interface.get_info()
         check = self.overwrite_check.get()
-        if len(info['sample']) == 0 and len(info['proj']) == 0 and check == 1:
+        if len(info['sample']) == 0 and len(info['proj']) != 0 and check == 1:
             self.information['text'] = 'Info: Sample name cannot leave blank.'
-        self.tagger = Tagger(path, info, check).tagging()
-        self.information['text'] = f'Info: Total process {len(path)} files.'
+        else:
+            self.tagger = Tagger(path, info, check).tagging()
+            self.information['text'] = f'Info: Total process {len(path)} files.'
 
 
 class file_fram(tk.LabelFrame):
@@ -200,20 +200,17 @@ class interface_fram(tk.Frame):
 
         #create weidgets
         self.sample_label = tk.Label(self, text = 'Sample name: ')
-        # self.env_label = tk.Label(self, text = 'Environment: ')
         self.proj_label = tk.Label(self, text = 'Project name: ')
         self.user_label = tk.Label(self, text = 'User name: ')
         self.tag_label = tk.Label(self, text = 'Tags: ')
 
         self.sample_Entry = tk.Entry(self)
-        # self.env_Entry = tk.Entry(self)
         self.proj_Entry = tk.Entry(self)
         self.user_Entry = tk.Entry(self)
         self.tag_CBox = ttk.Combobox(self)
 
         #config
         self.sample_label.config(width = 13, anchor = 'w')
-        # self.env_label.config(width = 13, anchor = 'w')
         self.proj_label.config(width = 13, anchor = 'w')
         self.user_label.config(width = 13, anchor = 'w')
         self.tag_label.config(width = 13, anchor = 'w')
@@ -227,6 +224,8 @@ class interface_fram(tk.Frame):
                 "",
                 "one_tone",
                 "two_tone",
+                "two_tone/sweep_flux",
+                "two_tone/sweep_pwr",
                 "Rabi",
                 "T1",
                 "T2E",
@@ -239,21 +238,18 @@ class interface_fram(tk.Frame):
 
         #layout
         self.sample_label.grid(row = 0, column = 0, sticky= 'w', padx = 5, pady = 3)
-        # self.env_label.grid(row = 1, column = 0, sticky= 'w', padx = 5, pady = 3)
-        self.proj_label.grid(row = 2, column = 0, sticky= 'w', padx = 5, pady = 3)
-        self.user_label.grid(row = 3, column = 0, sticky= 'w', padx = 5, pady = 3)
-        self.tag_label.grid(row = 4, column = 0, sticky= 'w', padx = 5, pady = 3)
+        self.proj_label.grid(row = 1, column = 0, sticky= 'w', padx = 5, pady = 3)
+        self.user_label.grid(row = 2, column = 0, sticky= 'w', padx = 5, pady = 3)
+        self.tag_label.grid(row = 3, column = 0, sticky= 'w', padx = 5, pady = 3)
 
         self.sample_Entry.grid(row = 0, column = 1)
-        # self.env_Entry.grid(row = 1, column = 1)
-        self.proj_Entry.grid(row = 2, column = 1)
-        self.user_Entry.grid(row = 3, column = 1)
-        self.tag_CBox.grid(row = 4, column = 1)
+        self.proj_Entry.grid(row = 1, column = 1)
+        self.user_Entry.grid(row = 2, column = 1)
+        self.tag_CBox.grid(row = 3, column = 1)
 
     def get_info(self):
         info_dict = {}
         info_dict['sample'] = self.sample_Entry.get()
-        # info_dict['env'] = self.env_Entry.get()
         info_dict['proj'] = self.proj_Entry.get()
         info_dict['user'] = self.user_Entry.get()
         info_dict['tag'] = [self.tag_CBox.get()]
